@@ -2,6 +2,7 @@ package com.techfun.form.service;
 
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void saveOrUpdate(User user) {
 
-		if (findById(user.getId())==null) {
+		if (user.getId() == null) {
 			userDao.save(user);
 		} else {
 			userDao.update(user);
@@ -40,7 +41,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void delete(int id) {
+	public void delete(Integer id) {
 		userDao.delete(id);
 	}
 	

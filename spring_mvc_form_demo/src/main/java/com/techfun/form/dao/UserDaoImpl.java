@@ -1,5 +1,7 @@
 package com.techfun.form.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import java.sql.SQLException;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -42,23 +45,14 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public User findById(Integer id) {
 
-		/*Map<String, Object> params = new HashMap<String, Object>();
-		params.put("id", id);*/
-
-		String sql = "SELECT * FROM users WHERE id=:id";
+		String sql = "SELECT * FROM users WHERE id= ?";
 
 		User result = null;
 		try {
-			//result = namedParameterJdbcTemplate.queryForObject(sql, params, new UserMapper());
 			result = jdbcTemplate.queryForObject(sql, new UserMapper(), id);
 		} catch (EmptyResultDataAccessException e) {
 			// do nothing, return null
 		}
-
-		/*
-		 * User result = namedParameterJdbcTemplate.queryForObject( sql, params,
-		 * new BeanPropertyRowMapper<User>());
-		 */
 
 		return result;
 
@@ -79,10 +73,30 @@ public class UserDaoImpl implements UserDao {
 
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 		
-		String sql = "INSERT INTO USERS(NAME, EMAIL, ADDRESS, PASSWORD, NEWSLETTER, FRAMEWORK, SEX, NUMBER, COUNTRY, SKILL) "
-				+ "VALUES ( :name, :email, :address, :password, :newsletter, :framework, :sex, :number, :country, :skill)";
+		String insertUser = "INSERT INTO users(name, email, address, password, newsletter, framework, sex, number, country, skill) "
+				+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		
+		jdbcTemplate.update(new PreparedStatementCreator() {
 
-		jdbcTemplate.update(sql, getSqlParameterByModel(user), keyHolder);
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+
+				PreparedStatement ps = con.prepareStatement(insertUser,
+						new String[] { "id" });
+				ps.setString(1, user.getName());
+		        ps.setString(2, user.getEmail());
+		        ps.setString(3, user.getAddress());
+		        ps.setString(4, user.getPassword());
+		        ps.setBoolean(5, user.isNewsletter()); 
+		        ps.setString(6, convertListToDelimitedString(user.getFramework()));
+		        ps.setString(7, user.getSex());
+		        ps.setInt(8, user.getNumber());
+		        ps.setString(9, user.getCountry());
+		        ps.setString(10, convertListToDelimitedString(user.getSkill()));
+				return ps;
+			}
+		}, keyHolder);
+		
 		user.setId(keyHolder.getKey().intValue());
 		
 	}
@@ -90,18 +104,20 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public void update(User user) {
 
-		String sql = "UPDATE USERS SET NAME=:name, EMAIL=:email, ADDRESS=:address, " + "PASSWORD=:password, NEWSLETTER=:newsletter, FRAMEWORK=:framework, "
-				+ "SEX=:sex, NUMBER=:number, COUNTRY=:country, SKILL=:skill WHERE id=:id";
-
-		jdbcTemplate.update(sql, getSqlParameterByModel(user));
+		String updateUser = "UPDATE users SET name=?, email=?, address=?, password=?, "
+				+ "newsletter=?, framework=?, sex=?, number=?, country=?, skill=? WHERE id=?";
+		
+		jdbcTemplate.update(updateUser, user.getName(), user.getEmail(), user.getAddress(), user.getPassword(),
+				user.isNewsletter(), convertListToDelimitedString(user.getFramework()), user.getSex(), 
+				user.getNumber(), user.getCountry(), convertListToDelimitedString(user.getSkill()), user.getId());
 
 	}
 
 	@Override
 	public void delete(Integer id) {
 
-		String sql = "DELETE FROM USERS WHERE id= :id";
-		jdbcTemplate.update(sql, new MapSqlParameterSource("id", id));
+		String sql = "DELETE FROM USERS WHERE id= ?";
+		jdbcTemplate.update(sql, id);
 
 	}
 

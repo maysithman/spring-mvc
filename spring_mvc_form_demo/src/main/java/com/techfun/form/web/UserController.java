@@ -71,49 +71,25 @@ public class UserController {
 
 	// save or update user
 	@RequestMapping(value = "/users", method = RequestMethod.POST)
-	public String saveOrUpdateUser(@ModelAttribute("userForm") @Validated User user,
-			BindingResult result, Model model, final RedirectAttributes redirectAttributes) {
+	public ModelAndView saveOrUpdateUser(@ModelAttribute("userForm") @Validated User user) {
 
-		logger.debug("saveOrUpdateUser() : {}", user);
-
-		if (result.hasErrors()) {
-			populateDefaultModel(model);
-			return "users/userform";
-		} else {
-
-			redirectAttributes.addFlashAttribute("css", "success");
-			if(user.isNew()){
-				redirectAttributes.addFlashAttribute("msg", "User added successfully!");
-			}else{
-				redirectAttributes.addFlashAttribute("msg", "User updated successfully!");
-			}
-			
+					
 			userService.saveOrUpdate(user);
 			
-			// POST/REDIRECT/GET
-			return "redirect:/users/" + user.getId();
-
-			// POST/FORWARD/GET
-			// return "user/list";
-
-		}
+			ModelAndView mav = new ModelAndView("redirect:/users/" + user.getId());
+			
+			return mav;
 
 	}
 
 	// show add user form
 	@RequestMapping(value = "/users/add", method = RequestMethod.GET)
-	public String showAddUserForm(Model model) {
+	public ModelAndView showAddUserForm(Model model) {
 
-		logger.debug("showAddUserForm()");
-
+		ModelAndView mav = new ModelAndView("users/userform");
+		
 		User user = new User();
 
-		// set default value
-		user.setName("mkyong123");
-		user.setEmail("test@gmail.com");
-		user.setAddress("abc 88");
-		//user.setPassword("123");
-		//user.setConfirmPassword("123");
 		user.setNewsletter(true);
 		user.setSex("M");
 		user.setFramework(new ArrayList<String>(Arrays.asList("Spring MVC", "GWT")));
@@ -125,7 +101,7 @@ public class UserController {
 
 		populateDefaultModel(model);
 
-		return "users/userform";
+		return mav;
 
 	}
 
@@ -146,16 +122,16 @@ public class UserController {
 
 	// delete user
 	@RequestMapping(value = "/users/{id}/delete", method = RequestMethod.POST)
-	public String deleteUser(@PathVariable("id") int id, final RedirectAttributes redirectAttributes) {
+	public ModelAndView deleteUser(@PathVariable("id") int id, final RedirectAttributes redirectAttributes) {
 
-		logger.debug("deleteUser() : {}", id);
+		ModelAndView mav = new ModelAndView("redirect:/users");
 
 		userService.delete(id);
 		
 		redirectAttributes.addFlashAttribute("css", "success");
 		redirectAttributes.addFlashAttribute("msg", "User is deleted!");
 		
-		return "redirect:/users";
+		return mav;
 
 	}
 

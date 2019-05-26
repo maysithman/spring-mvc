@@ -3,8 +3,8 @@
 <head>
 <title>Spring MVC Form Handling Example</title>
 
-<spring:url value="../resources/core/css/hello.css" var="coreCss" />
-<spring:url value="../resources/core/css/bootstrap.min.css"
+<spring:url value="/resources/core/css/hello.css" var="coreCss" />
+<spring:url value="/resources/core/css/bootstrap.min.css"
 	var="bootstrapCss" />
 <link href="${bootstrapCss}" rel="stylesheet" />
 <link href="${coreCss}" rel="stylesheet" />
